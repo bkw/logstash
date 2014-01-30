@@ -15,6 +15,11 @@ setgid logstash
 
 # You need to chdir somewhere writable because logstash needs to unpack a few
 # temporary files on startup.
-chdir /var/lib/logstash
 console log
-exec /usr/bin/java -jar /opt/logstash/logstash.jar agent -f /etc/logstash/conf.d
+script
+    . /etc/default/logstash
+    ulimit -n $OPEN_FILES
+    cd $LS_HOME
+    export HOME=$LS_HOME
+    exec nice -${NICE} -- $JAVA $LS_JAVA_OPTS -jar $LS_JAR agent -f $CONF_DIR --log $LOG_FILE
+end script
